@@ -63,18 +63,19 @@ namespace RaspberryPISecurityCam
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            if (File.Exists(Path.Combine("ClientSecrets", "client_secrets.json")))
+            {
+                var builder = new ConfigurationBuilder();
+                builder.SetBasePath(Directory.GetCurrentDirectory());
+                builder.AddJsonFile(Path.Combine("ClientSecrets", "client_secrets.json"), false, true);
+                var googleAuthSecretConfiguration = builder.Build();
 
-            var builder = new ConfigurationBuilder();
-            builder.SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile(Path.Combine("ClientSecrets", "client_secrets.json"), false, true);
-            var googleAuthSecretConfiguration = builder.Build();
-
-            services.AddAuthentication().AddGoogle(googleOptions =>
-                {
-                    googleOptions.ClientId = googleAuthSecretConfiguration["web:client_id"];
-                    googleOptions.ClientSecret = googleAuthSecretConfiguration["web:client_secret"];
-                });
-
+                services.AddAuthentication().AddGoogle(googleOptions =>
+                    {
+                        googleOptions.ClientId = googleAuthSecretConfiguration["web:client_id"];
+                        googleOptions.ClientSecret = googleAuthSecretConfiguration["web:client_secret"];
+                    });
+            }
 
             services.AddSingleton<FileDeleter>();
             services.AddSingleton<AlarmHandler>();
