@@ -3,3 +3,16 @@
 ################################################################################
 
 /RaspberryPISecurityCam/.credentials
+/RaspberryPISecurityCam/bin
+/RaspberryPISecurityCam/ClientSecrets/ServiceAccountSecret.p12
+/RaspberryPISecurityCam/ClientSecrets/ServiceAccountSecret.json
+/RaspberryPISecurityCam/ClientSecrets/GmailAPI.json/Google.Apis.Auth.OAuth2.Responses.TokenResponse-user
+/RaspberryPISecurityCam/ClientSecrets/GmailAPI.json
+/RaspberryPISecurityCam/ClientSecrets/client_secret_gmailapi.json
+/RaspberryPISecurityCam/ClientSecrets/client_secret_driveapi.json
+/RaspberryPISecurityCam/ClientSecrets/client_secrets.json
+/RaspberryPISecurityCam/Images
+/RaspberryPISecurityCam/Logs
+/RaspberryPISecurityCam/obj
+/RaspberryPISecurityCam/Settings
+/.vs

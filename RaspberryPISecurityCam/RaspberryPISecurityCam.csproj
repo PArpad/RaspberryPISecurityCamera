@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk.WEB">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <!--<UserSecretsId>51e5de2d-b705-4d70-a2fb-2a207b4663b9</UserSecretsId>-->
+    <!--<MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>-->
+    <!--<PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>-->
+    <!--<RuntimeIdentifier>linux-arm</RuntimeIdentifier>-->
+    <!--<UserSecretsId>2de6a574-baf1-4df2-9ddd-c4353aa51ec8</UserSecretsId>-->
+    <!--<UserSecretsId>aspnet-RaspberryPISecurityCam-C5BBACC4-20B2-4331-A95F-B91F9A316093</UserSecretsId>-->
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Google.Apis" Version="1.32.2" />
+    <PackageReference Include="Google.Apis.Auth" Version="1.32.2" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.32.2.1163" />
+    <PackageReference Include="Google.Apis.Gmail.v1" Version="1.32.2.1139" />
+    <PackageReference Include="HangFire" Version="1.6.17" />
+    <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
+    <PackageReference Include="Hangfire.SQLite.Core" Version="1.0.2" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Proxy" Version="0.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="2.0.2" />
+    <PackageReference Include="MimeKit" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" PrivateAssets="All" />
+    <PackageReference Include="NETCore.MailKit" Version="2.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="1.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0-preview1-final" />
+    <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="2.0.0-preview1-final" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0-preview1-final" />
+  </ItemGroup>
+
+  <Target Name="CreateLogsFolder" AfterTargets="AfterPublish">
+    <MakeDir Directories="$(PublishDir)Logs" Condition="!Exists('$(PublishDir)Logs')" />
+    <MakeDir Directories="$(PublishUrl)Logs" Condition="!Exists('$(PublishUrl)Logs')" />
+  </Target>
+  <Target Name="CreateImagesFolder" AfterTargets="AfterPublish">
+    <MakeDir Directories="$(PublishDir)Images" Condition="!Exists('$(PublishDir)Images')" />
+    <MakeDir Directories="$(PublishUrl)Images" Condition="!Exists('$(PublishUrl)Images')" />
+  </Target>
+  <Target Name="CreateSettingsFolder" AfterTargets="AfterPublish">
+    <MakeDir Directories="$(PublishDir)Settings" Condition="!Exists('$(PublishDir)Settings')" />
+    <MakeDir Directories="$(PublishUrl)Settings" Condition="!Exists('$(PublishUrl)Settings')" />
+  </Target>
+
+  <ItemGroup>
+    <Content Update="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

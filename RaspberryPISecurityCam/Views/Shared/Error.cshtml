@@ -1,0 +1,23 @@
+﻿@model ErrorViewModel
+
+<div class="jumbotron">
+    <h1 class="text-danger">Error.</h1>
+    <h2 class="text-danger">An error occurred while processing your request.</h2>
+
+    @if (Model.ShowRequestId)
+    {
+        <p>
+            <strong>Request ID:</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+
+    @if (!String.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div style="overflow-wrap: break-word;">
+            <p>
+                <strong>Error Message: </strong> <code>@Model.ErrorMessage</code>
+            </p>
+        </div>
+    }
+</div>
+

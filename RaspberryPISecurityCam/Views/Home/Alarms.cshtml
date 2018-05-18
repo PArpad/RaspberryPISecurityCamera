@@ -1,0 +1,156 @@
+﻿@using RaspberryPISecurityCam.Enums;
+@using RaspberryPISecurityCam.Classes;
+@model RaspberryPISecurityCam.Models.HomeViewModels.AlarmSettings
+
+<div class="jumbotron">
+    <fieldset>
+        <legend>Alarms</legend>
+        <form asp-controller="Home" asp-action="Alarms" method="post">
+            <ul class="nav nav-tabs">
+                @for (int i = 0; i < Model.AlarmTypes.Count(); i++)
+                {
+                
+                    @if(i==0)
+                    {
+                    <li class="nav-item">
+                        <a class="nav-link active show" aria-expanded="true" data-toggle="tab" href="#@Model.AlarmTypes[i].AlarmCondition">@Model.AlarmTypes[i].AlarmCondition</a>
+                    </li>
+                    }
+                    else
+                    {
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#@Model.AlarmTypes[i].AlarmCondition">@Model.AlarmTypes[i].AlarmCondition</a>
+                    </li>
+                    }
+                
+                }
+            </ul>
+            <div id="myTabContent" class="tab-content">
+                @for (int i = 0; i < Model.AlarmTypes.Count(); i++)
+                {
+                    <div class="tab-pane fade" id="@Model.AlarmTypes[i].AlarmCondition">
+                        @Html.HiddenFor(m => m.AlarmTypes[i].AlarmCondition)
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Action</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-primary">
+                                    <td>@EnumExtensions.GetDisplayName(ActionToAlarmEnum.SaveToCloudStorage)</td>
+                                    <td>
+                                            @for (int j = 0; j < Model.AlarmTypes[i].AlarmCloudStorage.Count; j++)
+                                            {
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="AlarmTypes[@i].AlarmCloudStorage[@j].IsSelected" checked="@Model.AlarmTypes[i].AlarmCloudStorage[j].IsSelected" asp-for="AlarmTypes[i].AlarmCloudStorage[j].IsSelected">
+                                                    <label class="custom-control-label" for="AlarmTypes[@i].AlarmCloudStorage[@j].IsSelected">@EnumExtensions.GetDisplayName(Model.AlarmTypes[i].AlarmCloudStorage[j].cloudStorageProviderEnum)</label>
+                                                </div>
+                                                @Html.HiddenFor(m => m.AlarmTypes[i].AlarmCloudStorage[j].cloudStorageProviderEnum)
+                                            }
+                                    </td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>@EnumExtensions.GetDisplayName(ActionToAlarmEnum.Logging)</td>
+                                    <td>
+                                            @for (int j = 0; j < Model.AlarmTypes[i].AlarmLogging.Count; j++)
+                                            {
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="AlarmTypes[@i].AlarmLogging[@j].IsSelected" checked="@Model.AlarmTypes[i].AlarmLogging[j].IsSelected" asp-for="AlarmTypes[i].AlarmLogging[j].IsSelected">
+                                                    <label class="custom-control-label" for="AlarmTypes[@i].AlarmLogging[@j].IsSelected">@EnumExtensions.GetDisplayName(Model.AlarmTypes[i].AlarmLogging[j].loggerProviderEnum)</label>
+                                                </div>
+                                                @Html.HiddenFor(m => m.AlarmTypes[i].AlarmLogging[j].loggerProviderEnum)
+                                            }
+                                    </td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td>@EnumExtensions.GetDisplayName(ActionToAlarmEnum.SendEmailNotification)</td>
+                                    <td>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="AlarmTypes[@i].AlarmEmailProvider.IsEmailSelected_Yes" asp-for="AlarmTypes[i].AlarmEmailProvider.IsEmailSelected" class="custom-control-input" value="true" checked="">
+                                                <label class="custom-control-label" for="AlarmTypes[@i].AlarmEmailProvider.IsEmailSelected_Yes">Yes</label>
+                                                <div class="form-group">
+                                                    @{
+                                                        <div class="custom-control custom-radio">
+                                                            <input asp-for="AlarmTypes[i].AlarmEmailProvider.SelectedEmailSender" id="AlarmTypes[@i].AlarmEmailProvider.EmailSenders[0].ID" class="custom-control-input" type="radio" checked="" value="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[0].Name" />
+                                                            <label class="custom-control-label" for="AlarmTypes[@i].AlarmEmailProvider.EmailSenders[0].ID">@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[0].Name</label>
+                                                            <input asp-for="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[0].ID" type="hidden" />
+                                                            <input asp-for="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[0].Name" type="hidden" />
+                                                        </div>
+                                                        for (int k = 1; k < Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders.Count(); k++)
+                                                        {
+                                                        <div class="custom-control custom-radio">
+                                                            <input asp-for="AlarmTypes[i].AlarmEmailProvider.SelectedEmailSender" id="AlarmTypes[@i].AlarmEmailProvider.EmailSenders[@k].ID" class="custom-control-input" type="radio" value="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[k].Name" />
+                                                            <label class="custom-control-label" for="AlarmTypes[@i].AlarmEmailProvider.EmailSenders[@k].ID">@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[k].Name</label>
+                                                            <input asp-for="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[k].ID" type="hidden" />
+                                                            <input asp-for="@Model.AlarmTypes[i].AlarmEmailProvider.EmailSenders[k].Name" type="hidden" />
+                                                        </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="AlarmTypes[@i].AlarmEmailProvider.IsEmailSelected_No" asp-for="AlarmTypes[i].AlarmEmailProvider.IsEmailSelected" class="custom-control-input" value="false">
+                                                <label class="custom-control-label" for="AlarmTypes[@i].AlarmEmailProvider.IsEmailSelected_No">No</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="table-warning">
+                                    <td>@EnumExtensions.GetDisplayName(ActionToAlarmEnum.SaveToSdCard)</td>
+                                    <td>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="AlarmTypes[@i].AlarmSaveToSd.IsSdSelected_Yes" asp-for="AlarmTypes[i].AlarmSaveToSd.IsSdSelected" class="custom-control-input" value="true" checked="">
+                                                <label class="custom-control-label" for="AlarmTypes[@i].AlarmSaveToSd.IsSdSelected_Yes">Yes</label>
+                                            </div>
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="AlarmTypes[@i].AlarmSaveToSd.IsSdSelected_No" asp-for="AlarmTypes[i].AlarmSaveToSd.IsSdSelected" class="custom-control-input" value="false">
+                                                <label class="custom-control-label" for="AlarmTypes[@i].AlarmSaveToSd.IsSdSelected_No">No</label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="form-group">
+                <div class="col-lg-12 col-lg-offset-5">
+                    <button type="reset" class="btn btn-default">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </form>
+    </fieldset>
+</div>
+
+<script>
+    $('#' + '@Model.AlarmTypes[0].AlarmCondition').addClass("active show");
+
+    $("#isDeletionBasedOnSize").change(function () {
+        $("#sizeDiv").toggle();
+    });
+
+    $('#AlarmForm').submit(function () { // set onsubmit event to the form
+        var data = $('#AlarmForm').serialize(); // serialize all the data in the form
+        $.ajax({
+            url: '@Url.Action("Alarms", "Home")',
+            data: { dataString: data },
+            type: 'POST', // set sending HTTP Request type
+            async: true,
+            success: function (data) { // callback method for further manipulations
+                for (key in data.email) {
+                    alert(data.email[key]);
+                }
+            },
+            error: function (data) { // if error occured
+                alert("error");
+            }
+        });
+        return false;
+    });
+</script>

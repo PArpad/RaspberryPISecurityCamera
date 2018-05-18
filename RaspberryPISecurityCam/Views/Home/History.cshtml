@@ -1,0 +1,133 @@
+﻿@inject IJsonHelper Json;
+
+<div class="jumbotron">
+    <fieldset>
+        <legend>History</legend>
+        <fieldset>
+            <div class="row" id="divIdForImageResize">
+                <div class="col-lg-1">
+                    <label> </label>
+                    <p>Filter:</p>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>From</label>
+                        <input type="text" class="form-control form-control-1 input-sm from" placeholder="CheckIn" id="fromDateId">
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="text" class="form-control form-control-2 input-sm to" placeholder="CheckOut" id="toDateId">
+                    </div>
+                </div>
+                <div class="col-lg-1">
+
+                </div>
+            </div>
+            <div class="row" id="fileDiv">
+
+            </div>
+        </fieldset>
+    </fieldset>
+</div>
+
+
+
+
+<script>
+    var startDate = new Date();
+    var fechaFin = new Date();
+    var FromEndDate = new Date();
+    var ToEndDate = new Date();
+
+    $('.from').datepicker({
+        autoclose: true,
+        minViewMode: 1,
+        dateFormat: 'yy.mm.dd'
+    }).on('changeDate', function (selected) {
+        startDate = new Date(selected.date.valueOf());
+        startDate.setDate(startDate.getDate(new Date(selected.date.valueOf())));
+        $('.to').datepicker('setStartDate', startDate);
+    });
+
+    $('.to').datepicker({
+        autoclose: true,
+        minViewMode: 1,
+        dateFormat: 'yy.mm.dd'
+    }).on('changeDate', function (selected) {
+        var fromdate = $(this).val();
+        alert(fromdate);
+        FromEndDate = new Date(selected.date.valueOf());
+        FromEndDate.setDate(FromEndDate.getDate(new Date(selected.date.valueOf())));
+        $('.from').datepicker('setEndDate', FromEndDate);
+    });
+
+        Date.prototype.yyyymmdd = function (convertdate) {
+            var mm = convertdate.getMonth()+1; // getMonth() is zero-based
+            var dd = convertdate.getDate();
+
+            return [convertdate.getFullYear(),
+            (mm > 9 ? '' : '0') + mm,
+            (dd > 9 ? '' : '0') + dd
+            ].join('.')+".";
+        };
+
+        var getDates = function (startDate, endDate) {
+            var dates = [],
+                currentDate = startDate,
+                addDays = function (days) {
+                    var date = new Date(this.valueOf());
+                    date.setDate(date.getDate() + days);
+                    return date;
+                };
+            while (currentDate <= endDate) {
+                dates.push(currentDate);
+                currentDate = addDays.call(currentDate, 1);
+            }
+            return dates;
+        };
+
+        function getSelectorOptions() {
+            var fromdate = $('#fromDateId').datepicker("getDate");
+            var todate = $('#toDateId').datepicker("getDate");
+            if (fromdate != null && todate != null) {
+                var dates = getDates(fromdate, todate);
+                var converteddates = [];
+                dates.forEach(function (convertdate) {
+                    var date = new Date();
+                    converteddates.push(date.yyyymmdd(convertdate));
+                });
+                var rowwidth = $("#divIdForImageResize").innerWidth();
+                $.ajax({
+                    url: '@Url.Action("MediaPartial", "Home")',
+                    type: 'POST',
+                    traditional: true,
+                    data: { dates: converteddates, width: rowwidth },
+                    success: function (data) {
+                        if (data) {  // check if data is defined
+                            $("#fileDiv").html(data);
+                        }
+                    }
+                });
+            }
+        }
+
+        $('#fromDateId').on('change', function () {
+            getSelectorOptions();
+        });
+        $('#toDateId').on('change', function () {
+            getSelectorOptions();
+        });
+
+        $(window).resize(function () {
+            var imagesPerRow = Number(3);
+            var marginSize = Number(20);
+            var rowwidth = (Number($("#divIdForImageResize").width()) - marginSize * 2 * imagesPerRow) / imagesPerRow;
+            $("#fileDiv").children().children().children().each(function ()
+            {
+                $(this).css({ 'width': rowwidth + 'px'});
+            });
+
+        });
+</script>

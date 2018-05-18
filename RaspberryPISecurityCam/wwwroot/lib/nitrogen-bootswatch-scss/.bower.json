@@ -1,0 +1,26 @@
+{
+  "name": "nitrogen-bootswatch-scss",
+  "description": "Bootswatch themes in scss format packaged as a component.",
+  "author": "Paul English",
+  "homepage": "http://bootswatch.com",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/timfpark/bootswatch-scss.git"
+  },
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "_release": "e36495f242",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "e36495f242b2ddb1a4885525061ebfb225064813"
+  },
+  "_source": "https://github.com/timfpark/bootswatch-scss.git",
+  "_target": "*",
+  "_originalSource": "nitrogen-bootswatch-scss",
+  "_direct": true
+}

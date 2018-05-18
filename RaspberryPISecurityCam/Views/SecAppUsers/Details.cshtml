@@ -1,0 +1,70 @@
+﻿@using RaspberryPISecurityCam.Authorization;
+@model RaspberryPISecurityCam.Models.SecAppUser
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>SecAppUser</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.OwnerID)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.OwnerID)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Status)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Status)
+        </dd>
+    </dl>
+</div>
+
+@if (Model.Status != UserStatus.Approved)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(User, Model, SecAppUserOperations.Approve)).Succeeded)
+    {
+        <form asp-action="SetRoleApproved" asp-controller="SecAppUsers" style="display:inline;">
+            <input type="hidden" name="id" value="@Model.SecAppUserId" />
+            <input type="hidden" name="status" value="@UserStatus.Approved" />
+            <button type="submit" class="btn btn-xs btn-success">Approve</button>
+        </form>
+    }
+}
+@if (Model.Status != UserStatus.Rejected)
+{
+    @if ((await AuthorizationService.AuthorizeAsync(User, Model, SecAppUserOperations.Reject)).Succeeded)
+    {
+        <form asp-action="SetRoleDisApproved" asp-controller="SecAppUsers" style="display:inline;">
+            <input type="hidden" name="id" value="@Model.SecAppUserId" />
+            <input type="hidden" name="status" value="@UserStatus.Rejected" />
+            <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+        </form>
+    }
+}
+<div>
+
+    @*@if((await AuthorizationService.AuthorizeAsync(User, Model, SecAppUserOperations.Update)).Succeeded)
+    {
+    <a asp-action="Edit" asp-route-id="@Model.SecAppUserId">Edit</a> <text>|</text>
+    }*@
+    <a asp-action="Index">Back to List</a>
+</div>

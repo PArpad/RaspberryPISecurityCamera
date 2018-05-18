@@ -1,0 +1,35 @@
+﻿// Configure bundling and minification for the project.
+// More info at https://go.microsoft.com/fwlink/?LinkId=808241
+[
+  {
+    "outputFileName": "wwwroot/css/site.min.css",
+    // An array of relative input file paths. Globbing patterns supported
+    "inputFiles": [
+      "wwwroot/css/site.css",
+      "wwwroot/lib/bootstrap/dist/css/bootstrap.css",
+      "wwwroot/lib/bootswatch-pineapple/united/bootstrap.min.css",
+      "wwwroot/lib/font-awesome/css/font-awesome.css",
+      "wwwroot/lib/bootstrap-social/bootstrap-social.css",
+      "wwwroot/lib/bootstrap-select/dist/css/bootstrap-select.css"
+    ]
+  },
+  {
+    "outputFileName": "wwwroot/js/site.min.js",
+    "inputFiles": [
+      "wwwroot/js/site.js",
+      "wwwroot/lib/bootstrap/dist/js/bootstrap.js",
+      "wwwroot/lib/bootstrap-select/js/bootstrap-select.js",
+      "wwwroot/js/polyClip-master/js/jquery-1.11.2.min.js",
+      "wwwroot/js/polyClip-master/js/polyClip-p.js",
+      "wwwroot/js/lib/file-saver/FileSaver.js",
+      "wwwroot/lib/jquery-ui/jquery-ui.js"
+    ],
+    // Optionally specify minification options
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    // Optionally generate .map file
+    "sourceMap": false
+  }
+]

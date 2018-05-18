@@ -1,0 +1,338 @@
+﻿@using System.Text.RegularExpressions;
+@model RaspberryPiSecurityCam.Models.SettingsViewModel
+@{
+    IEnumerable<string> Options = ViewData["Options"] as IEnumerable<string>;
+}
+@{
+    ViewData["Width"] = "";
+    ViewData["Height"] = "";
+    ViewData["StreamAddress"] = "";
+    ViewData["StreamMaxrate"] = "";
+    foreach (string s in Options)
+    {
+        if (s.Contains("width"))
+        {
+            ViewData["Width"] = Regex.Match(s, @"\d+").Value;
+        }
+        if (s.Contains("height"))
+        {
+            ViewData["Height"] = @Regex.Match(s, @"\d+").Value;
+        }
+        if (s.Contains("target_dir"))
+        {
+            ViewData["SaveDirectory"] = @Regex.Match(s, @"(/[a-z A-Z]*(/[a-z A-Z]*)*)|([a-z A-Z]:\\([a-z A-Z]*\\)*)").Value;
+        }
+        if (s.Contains("#StreamAddress "))
+        {
+            ViewData["StreamAddress"] = @Regex.Match(s, @"http://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}").Value;
+        }
+        if (s.Contains("stream_maxrate"))
+        {
+            ViewData["StreamMaxrate"] = @Regex.Match(s, @"\d+").Value;
+        }
+    }
+}
+@{foreach (string s in Options)
+    {
+        ViewData["EmbedResolution"] = "";
+        if ((string)ViewData["Width"] == "640" || (string)ViewData["Width"] == "1024")
+        {
+            ViewData["EmbedResolution"] = "embed-responsive embed-responsive-4by3";
+        }
+        else if ((string)ViewData["Width"] == "1366" || (string)ViewData["Width"] == "1920")
+        {
+            ViewData["EmbedResolution"] = "embed-responsive embed-responsive-16by9";
+        }
+    }
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<style>
+    canvas {
+        border-style: solid;
+    }
+</style>
+<div class="jumbotron">
+    <fieldset>
+        <legend>Camera</legend>
+        <fieldset>
+            <div class="row">
+                <div class="col-lg-12" align="center" id="selectorDivId">
+                    <h4>Motionsensation's area selector</h4>
+                    <div id="canvasDiv">
+                        <br />
+                        <button id="generate" type="button" class="btn btn-primary">
+                            Generate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset>
+            <div class="row">
+                <div id="resultDivId" style="display:none" class="col-lg-12" align="center">
+                    <h4>Result of the area selection:</h4>
+                    <br />
+                    <div id="divofclipParent" class="clipParent" align="center">
+                    </div>
+                    <input type="button" id="convertImage" value="Convert" class="btn btn-primary" style="display:none" />
+                </div>
+            </div>
+            <div class="row">
+                <div id="saveFormDiv"style="display:none" class="col-lg-12" align="center">
+                    @using (Html.BeginForm("PostFile", "Home", FormMethod.Post, new { id = "drawingForm" }))
+                    {
+                    <input type="hidden" name="imageData" id="imageData" />
+                    <input type="button" id="btnSave" value="Save Drawing" class="btn btn-primary" style="display:none" />
+                    }
+                    <div id="confirmDialog" title="Save Sensation Area" hidden>
+                        <p>Do you want to save the clipped area?</p>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </fieldset>
+</div>
+<div class="jumbotron">
+    <fieldset>
+        <legend>Options</legend>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <label class="col-lg-3 control-label">Resolution:</label>
+                    </div>
+                    <div class="col-lg-3">
+                        @ViewData["Width"]
+                        x
+                        @ViewData["Height"]
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <label class="col-lg-3 control-label">Address:</label>
+                    </div>
+                    <div class="col-lg-3">
+                        @ViewData["StreamAddress"]
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <label class="col-lg-3 control-label">Framerate:</label>
+                    </div>
+                    <div class="col-lg-3">
+                        @ViewData["StreamMaxrate"]
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <label class="col-lg-3 control-label">Save Directory:</label>
+                    </div>
+                    <div class="col-lg-6">
+                        @ViewData["SaveDirectory"]
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <fieldset>
+                    <legend>Modify</legend>
+                    <form class="form-horizontal" asp-controller="Home" asp-action="Settings" method="post">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">Resolution</label>
+                            <div class="checkbox checkboxlist col-lg-10">
+                                @{
+                                    for (int i = 0; i < Model.ResolutionList.Count(); i++)
+                                    {
+                                        <input asp-for="SelectedResolution" value="@Model.ResolutionList[i].ResolutionString" type="radio" />
+                                        <label asp-for="@Model.ResolutionList[i].ID">@Model.ResolutionList[i].ResolutionString</label>
+                                            <input asp-for="@Model.ResolutionList[i].ID" type="hidden" />
+                                            <br />
+                                    }
+                                }
+                            </div>
+                            <div class="col-lg-10">
+                                <span asp-validation-for="SelectedResolution" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="FrameRate" class="col-lg-2 control-label">Framerate</label>
+                            <div class="col-lg-12">
+                                <input class="form-control" asp-for="FrameRate" />
+                                <span asp-validation-for="FrameRate" class="text-danger"></span>
+                                <span class="help-block">The framerate of the captured video.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="IPAddress" class="col-lg-2 control-label">IPAddress</label>
+                            <div class="col-lg-12">
+                                <input class="form-control" asp-for="IPAddress" />
+                                <span asp-validation-for="IPAddress" class="text-danger"></span>
+                                <span class="help-block">IP address of the RaspberryPI, with the port opened for streaming.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="SaveDirectory" class="col-lg-2 control-label">SaveDirectory</label>
+                            <div class="col-lg-12">
+                                <input class="form-control" asp-for="SaveDirectory" />
+                                <span asp-validation-for="SaveDirectory" class="text-danger"></span>
+                                <span class="help-block">Path to the directory, where Motion saves the images.</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-lg-6 col-lg-offset-4">
+                                <button type="reset" class="btn btn-default">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </fieldset>
+</div>
+
+
+<script>
+    $("#confirmDialog").dialog({
+        autoOpen: false,
+        modal: true,
+        resizable: false,
+        buttons: {
+            "Ok": function () {
+                var form = $("#drawingForm");
+                var image = new Image();
+                image.setAttribute('crossOrigin', 'anonymous');
+                image = document.getElementById("genimg").toDataURL("image/png");
+                image = image.replace('data:image/png;base64,', '');
+                $("#imageData").val(image);
+                form.submit();
+            },
+            "No": function (e) {
+                $(this).dialog("close");
+                $("#selectorDivId").toggle();
+                $("#resultDivId").toggle();
+                $("#saveFormDiv").toggle();
+            }
+        },
+    });
+
+    $("#btnSave").click(function (e) {
+        $("#resultDiv").toggle();
+        $("#btnSave").toggle();
+        e.preventDefault();
+        $('#confirmDialog').dialog('open');
+    });
+
+    var canvasDiv = document.getElementById('canvasDiv');
+    canvas = document.createElement('canvas');
+    canvas.setAttribute('id', 'canvas');
+    $(canvasDiv).prepend(canvas);
+    if (typeof G_vmlCanvasManager != 'undefined') {
+        canvas = G_vmlCanvasManager.initElement(canvas);
+    }
+
+    var context = canvas.getContext('2d');
+    var imageObj = new Image();
+    //imageObj.setAttribute('crossOrigin', 'anonymous');
+    imageObj.onload = function () {
+        $(canvas).attr({ width: this.width, height: this.height });
+        context.drawImage(imageObj, 0, 0);
+    };
+    imageObj.src = "/stream/";
+
+    var clickX = new Array();
+    var clickY = new Array();
+    var clickDrag = new Array();
+    var paint;
+
+    function addClick(x, y, dragging) {
+        clickX.push(x);
+        clickY.push(y);
+        clickDrag.push(dragging);
+    }
+
+    function redraw() {
+        canvas.width = canvas.width; // Clears the canvas
+        context.drawImage(imageObj, 0, 0);
+
+        context.strokeStyle = "#df4b26";
+        context.lineJoin = "round";
+        context.lineWidth = 5;
+
+        for (var i = 0; i < clickX.length; i++) {
+            context.beginPath();
+            context.arc(clickX[i], clickY[i], 3, 0, 2 * Math.PI, false);
+            context.fillStyle = '#ffffff';
+            context.fill();
+            context.lineWidth = 5;
+            context.stroke();
+            if (i > 0) {
+                context.lineWidth = "5";
+                context.strokeStyle = "red"; // Green path
+                context.moveTo(clickX[i - 1], clickY[i - 1]);
+                context.lineTo(clickX[i], clickY[i]);
+                context.stroke();
+
+            }
+            if (i == clickX.length - 1) {
+                context.lineWidth = "5";
+                context.strokeStyle = "green"; // Green path
+                context.moveTo(clickX[0], clickY[0]);
+                context.lineTo(clickX[i], clickY[i]);
+                context.stroke();
+            }
+        }
+    }
+
+    $('#canvas').click(function (e) {
+        var mouseX = e.offsetX;
+        var mouseY = e.offsetY;
+
+        addClick(e.offsetX, e.offsetY);
+        redraw();
+    });
+
+    $('#generate').click(function () {
+        $(".clipParent").empty();
+        $(".clipParent").prepend('<img src="/stream/" id="genimg"/>');
+        var arr = [];
+        for (var i = 0; i < clickX.length; i++) {
+            arr.push(clickX[i]);
+            arr.push(clickY[i]);
+        }
+        document.getElementById("genimg").setAttribute("data-polyclip", arr.join(", "));
+        $("#selectorDivId").toggle();
+        $("#resultDivId").toggle();
+        $("#convertImage").toggle();
+        $("#btnSave").toggle();
+        clickX = [];
+        clickY = [];
+        redraw();
+        polyClip.init();
+    });
+    $('#convertImage').click(function () {
+        var ctx = document.getElementById("genimg").getContext('2d');
+        ctx.globalCompositeOperation = "source-in";
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, $("#genimg").width(), $("#genimg").height());
+        var imgData = ctx.getImageData(0, 0, $("#genimg").width(), $("#genimg").height());
+        var data = imgData.data;
+
+        for (var i = 0; i < data.length; i += 4) {
+            if (data[i + 3] == 0) {
+                data[i] = 0;
+                data[i + 1] = 0;
+                data[i + 2] = 0;
+                data[i + 3] = 255;
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        $("#saveFormDiv").toggle();
+        $("#convertImage").toggle();
+    });
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

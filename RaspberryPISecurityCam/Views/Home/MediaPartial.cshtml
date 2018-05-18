@@ -1,0 +1,92 @@
+﻿@model RaspberryPISecurityCam.Models.HomeViewModels.MediaFileViewModel
+@{string folderPath = "/MediaFiles/"; }
+
+@foreach (var date in Model.FileDates)
+{
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="row">
+                <h4 class="text-primary"><strong>@date.ToShortDateString()</strong></h4>
+            </div>
+            <div class="row">
+                @foreach (var media in Model.MediaFiles.Where(m => m.LastWriteTime.DayOfYear == date.DayOfYear))
+                {
+                    <div class="grow pic" style="padding-left: 0px">
+                        @if (!media.Name.Contains(".mp4"))
+                        {
+                            <img class="img-responsive" src="@String.Concat(folderPath, media.Name)" width="250" />
+                        }
+                        else
+                        {
+                            <video width="250" controls>
+                                <source src="@String.Concat(folderPath, media.Name)" type="video/mp4">
+                            </video>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $("video").mousedown(function () {
+        if ($(this).get(0).paused == true) {
+            $(this).get(0).play();
+        }
+        else { $(this).get(0).pause(); }
+    })
+</script>
+<style>
+    * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    .pic {
+        margin: 20px;
+        overflow: hidden;
+        float: left;
+        -webkit-box-shadow: 5px 5px 5px #111;
+        box-shadow: 5px 5px 5px #111;
+        -webkit-transition: all 1s ease;
+        -moz-transition: all 1s ease;
+        -o-transition: all 1s ease;
+        -ms-transition: all 1s ease;
+        transition: all 1s ease;
+    }
+
+    /*GROW*/
+    .grow img {
+        -webkit-transition: all 1s ease;
+        -moz-transition: all 1s ease;
+        -o-transition: all 1s ease;
+        -ms-transition: all 1s ease;
+        transition: all 1s ease;
+    }
+
+    .pic:hover {
+        transform: scale(3);
+    }
+
+    .grow img:hover {
+    }
+
+    /*GROW*/
+    .grow img {
+        -webkit-transition: all 1s ease;
+        -moz-transition: all 1s ease;
+        -o-transition: all 1s ease;
+        -ms-transition: all 1s ease;
+        transition: all 1s ease;
+    }
+
+        .grow img:hover {
+        }
+
+    video::-webkit-media-controls {
+        display: none !important;
+    }
+</style>

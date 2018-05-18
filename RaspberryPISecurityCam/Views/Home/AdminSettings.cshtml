@@ -1,0 +1,184 @@
+﻿@model RaspberryPISecurityCam.Models.HomeViewModels.AdminSettings
+@using Microsoft.Extensions.Logging;
+
+<div class="jumbotron">
+    <fieldset>
+        <legend>Admin Settings</legend>
+        <form asp-controller="Home" asp-action="AdminSettings" method="post">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-lg-2" style="padding-right:5px">
+                            @Html.Label("Log Level")
+                        </div>
+                        <div class="col-lg-3" style="padding-left:0px">
+                            <select class="form-control" asp-for="logLevel" asp-items="Html.GetEnumSelectList<LogLevel>()"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <label style="padding-right:10px;padding-left:15px">Deletion based on time</label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="isDeletionBasedOnTime" asp-for="isDeletionBasedOnTime">
+                                <label class="custom-control-label" for="isDeletionBasedOnTime"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9" id='dateDiv' @if (!Model.isDeletionBasedOnTime) { @Html.Raw("style='display:none'") ; }>
+                        <div class="row">
+                            <div class="col-lg-5">
+                                @Html.Label("Files will be deleted, if older than: ")
+                            </div>
+                            <div class="col-lg-2" style="text-align:center">
+                                <div>
+                                    <input class="form-control" asp-for="month" />
+                                    <span asp-validation-for="month" class="text-danger"></span>
+                                </div>
+                                <span class="help-block">Month</span>
+                            </div>
+                            <div class="col-lg-2" style="text-align:center">
+                                <div>
+                                    <input class="form-control" asp-for="day" />
+                                    <span asp-validation-for="day" class="text-danger"></span>
+                                </div>
+                                <span class="help-block">Day</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        <div class="row">
+                            <label style="padding-right:10px;padding-left:15px">Deletion based on size</label>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="isDeletionBasedOnSize" asp-for="isDeletionBasedOnSize">
+                                <label class="custom-control-label" for="isDeletionBasedOnSize"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9" id='sizeDiv' @if (!Model.isDeletionBasedOnSize) { @Html.Raw("style='display:none'") ; }>
+                        <div class="row">
+                            <div class="col-lg-5">
+                                @Html.Label("Files will be deleted, if larger than: ")
+                            </div>
+                            <div class="col-lg-2" style="text-align:center">
+                                <div>
+                                    <input class="form-control" asp-for="sizeThreshold" />
+                                    <span asp-validation-for="sizeThreshold" class="text-danger"></span>
+                                </div>
+                                <span class="help-block">KiloBytes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-3">
+                        @Html.Label("Email addresses: ")
+                    </div>
+                    <div class="col-lg-9" id="emailAddressesDivId">
+                        @foreach (var email in Model.emailAddresses)
+                {
+                    <div class="row" id="emailDivId" style="padding-bottom:10px;">
+                        <div class="col-lg-3" style="padding-left:0px">
+                            @email
+                        </div>
+                        <div class="col-lg-1" style="padding-left:3px;padding-right:0px">
+                            <button type="button" class="btn btn-primary deleteButton" id="deleteEmail_@email" style="padding:0px;font-size:15px;font-weight:500;">X</button>
+                        </div>
+                    </div>
+        }
+                        <div class="row" id="addEmailDivId" style="padding-bottom:10px;">
+                            <div class="col-lg-5" style="padding-left:0px;padding-right:0px">
+                                <input class="form-control" autocomplete='email' type="email" id="newEmailId" />
+                            </div>
+                            <div class="col-lg-1" style="padding-left:3px;padding-right:0px">
+                                <button type="button" class="btn btn-primary" id="addNewEmail" style="padding:0px;font-size:25px;font-weight:800;">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="hiddenEmailAddressesDivId">
+                    @for (int i = 0; i < Model.emailAddresses.Count(); i++)
+            {
+                <input type="hidden" name="emailAddresses" value="@Model.emailAddresses[i]" />
+    }
+                </div>
+                <div class="form-group">
+                    <div class="col-lg-6 col-lg-offset-4">
+                        <button type="reset" class="btn btn-default">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+        </form>
+    </fieldset>
+</div>
+
+<script>
+    SetSizeOfButtons();
+
+    function SetSizeOfButtons(){
+        $("#addNewEmail").height("36px");
+        $("#addNewEmail").width("36px");
+        $(".deleteButton").height("25px");
+        $(".deleteButton").width("25px");
+    }
+
+    $("#isDeletionBasedOnTime").change(function () {
+        $("#dateDiv").toggle();
+    });
+    $("#isDeletionBasedOnSize").change(function () {
+        $("#sizeDiv").toggle();
+    });
+    $("#addNewEmail").click(function () {
+        var email = $("#newEmailId").val();
+        var currentEmails = [];
+
+        $('input[name=emailAddresses]').each(function (index) {
+            currentEmails.push($(this).val());
+        });
+
+        console.log(currentEmails);
+
+        if (validateEmail(email)) {
+            $("#newEmailId").removeClass("is-invalid");
+            if (jQuery.inArray(email,currentEmails) < 0)
+            {
+                $("#hiddenEmailAddressesDivId").append('<input type="hidden" name="emailAddresses" value="' + email + '"/>');
+                var newEmailRow = '<div class="row" id="emailDivId"  style="padding-bottom:10px;"><div class="col-lg-3" style="padding-left:0px">' + email + '</div><div class="col-lg-1" style="padding-left:3px;padding-right:0px"><button type="button" class="btn btn-primary deleteButton" id="deleteEmail_' + email +'" style="padding:0px;font-size:15px;font-weight:500;">X</button></div></div>'
+                $("#addEmailDivId").before(newEmailRow);
+                $("#emailErrorDivId").remove();
+                SetSizeOfButtons();
+            }
+            else {
+                $("#newEmailId").addClass("is-invalid");
+                $("#newEmailId").after('<div class="invalid-feedback" id="emailErrorDivId">Email is already in the list!</div>');
+            }
+        }
+        else {
+            $("#newEmailId").addClass("is-invalid");
+            $("#newEmailId").after('<div class="invalid-feedback" id="emailErrorDivId">Input is not a valid email address!</div>');
+        }
+    });
+
+    $("#emailAddressesDivId").on('click', '.deleteButton', function (event) {
+        var id = $(this).attr('id');
+        $(this).parent().parent().remove();
+        $('input[name=emailAddresses]').each(function (index) {
+            if (~id.indexOf($(this).val())) {
+                $(this).remove();
+            }
+        });
+    });
+
+    function validateEmail(emailField){
+        var reg = /^([a-zA-Z0-9_.-])+@@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$/;
+        if (reg.test(emailField) == false)
+        {
+            return false;
+        }
+        return true;
+    }
+</script>

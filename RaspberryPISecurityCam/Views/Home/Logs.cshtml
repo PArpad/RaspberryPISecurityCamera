@@ -1,0 +1,172 @@
+﻿@model RaspberryPISecurityCam.Models.HomeViewModels.LogsViewModel
+@inject IJsonHelper Json;
+@using Microsoft.Extensions.Logging;
+
+
+
+
+
+<div class="jumbotron">
+    <fieldset>
+        <legend>Logs</legend>
+        <fieldset>
+            <div class="row">
+                <div class="col-lg-1">
+                    <label> </label>
+                    <p>Filter:</p>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>From</label>
+                        <input type="text" class="form-control form-control-1 input-sm from" placeholder="From" id="fromDateId">
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="text" class="form-control form-control-2 input-sm to" placeholder="To" id="toDateId">
+                    </div>
+                </div>
+                <div class="col-lg-1">
+
+                </div>
+                <div class="col-lg-2">
+                    <label>Loglevel</label>
+                    <select class="form-control" id="logLevelSelector">
+                        <option>@LogLevel.None.ToString()</option>
+                        <option>@LogLevel.Critical.ToString()</option>
+                        <option>@LogLevel.Error.ToString()</option>
+                        <option>@LogLevel.Warning.ToString()</option>
+                        <option>@LogLevel.Information.ToString()</option>
+                        <option>@LogLevel.Trace.ToString()</option>
+                    </select>
+                </div>
+                <div class="col-lg-1">
+
+                </div>
+                <div class="col-lg-3">
+                    <label>Logfile Chooser</label>
+                    <select class="form-control" id="logSelector">
+                        <option id="defaultSelectId">Please select a file!</option>
+                        @foreach (string file in Model.FileNames)
+                        {
+                            <option>@file</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="row" id="fileDiv">
+
+            </div>
+        </fieldset>
+    </fieldset>
+</div>
+
+
+
+
+<script>
+        $('select').on('change', function () {
+            var fileselector = document.getElementById("logSelector");
+            var selectedFile = fileselector.options[fileselector.selectedIndex].text;
+            var defaultSelect = document.getElementById("defaultSelectId");
+            if (selectedFile != defaultSelect.text) {
+                var loglevelselector = document.getElementById("logLevelSelector");
+                var selectedLoglevel = loglevelselector.options[loglevelselector.selectedIndex].value;
+                $.ajax({
+                    url: '@Url.Action("LogsPartial", "Home")',
+                    type: 'POST',
+                    data: { fileName: selectedFile, logLevel: selectedLoglevel },
+                    success: function (data) {
+                        if (data) {  // check if data is defined
+                            $("#fileDiv").html(data);
+                        }
+                    }
+                });
+                defaultSelect.style.display = "none"
+            }
+    })
+
+    var startDate = new Date();
+    var fechaFin = new Date();
+    var FromEndDate = new Date();
+    var ToEndDate = new Date();
+
+    $('.from').datepicker({
+        autoclose: true,
+        minViewMode: 1,
+        dateFormat: 'yy.mm.dd'
+    }).on('changeDate', function (selected) {
+        startDate = new Date(selected.date.valueOf());
+        startDate.setDate(startDate.getDate(new Date(selected.date.valueOf())));
+        $('.to').datepicker('setStartDate', startDate);
+    });
+
+    $('.to').datepicker({
+        autoclose: true,
+        minViewMode: 1,
+        dateFormat: 'yy.mm.dd'
+    }).on('changeDate', function (selected) {
+        var fromdate = $(this).val();
+        alert(fromdate);
+        FromEndDate = new Date(selected.date.valueOf());
+        FromEndDate.setDate(FromEndDate.getDate(new Date(selected.date.valueOf())));
+        $('.from').datepicker('setEndDate', FromEndDate);
+    });
+
+        Date.prototype.yyyymmdd = function (convertdate) {
+            var mm = convertdate.getMonth()+1; // getMonth() is zero-based
+            var dd = convertdate.getDate();
+
+            return [convertdate.getFullYear(),
+            (mm > 9 ? '' : '0') + mm,
+            (dd > 9 ? '' : '0') + dd
+            ].join('');
+        };
+
+        var getDates = function (startDate, endDate) {
+            var dates = [],
+                currentDate = startDate,
+                addDays = function (days) {
+                    var date = new Date(this.valueOf());
+                    date.setDate(date.getDate() + days);
+                    return date;
+                };
+            while (currentDate <= endDate) {
+                dates.push(currentDate);
+                currentDate = addDays.call(currentDate, 1);
+            }
+            return dates;
+        };
+
+        function getSelectorOptions() {
+            var fromdate = $('#fromDateId').datepicker("getDate");
+            var todate = $('#toDateId').datepicker("getDate");
+            if (fromdate != null && todate != null) {
+                var dates = getDates(fromdate, todate);
+                var converteddates = [];
+                dates.forEach(function (convertdate) {
+                    var date = new Date();
+                    converteddates.push("Log_" + date.yyyymmdd(convertdate) + ".log");
+                });
+                var output = [];
+                var filenames = @Html.Raw(Json.Serialize(Model.FileNames));
+
+
+                $.each(filenames, function (key, value) {
+                    var contains = (JSON.stringify(converteddates).indexOf(value) > -1);
+                    if (contains) {
+                        output.push('<option value="' + key + '">' + value + '</option>');
+                    }
+                });
+                $('#logSelector').html(output.join(''));
+            };
+        }
+
+        $('#fromDateId').on('change', function () {
+            getSelectorOptions();
+        });
+        $('#toDateId').on('change', function () {
+            getSelectorOptions();
+        });
+</script>

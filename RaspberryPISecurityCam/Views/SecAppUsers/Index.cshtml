@@ -1,0 +1,54 @@
+﻿@using RaspberryPISecurityCam.Authorization;
+@model IEnumerable<RaspberryPISecurityCam.Models.SecAppUser>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Index</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Status)
+                </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+            @if ((await AuthorizationService.AuthorizeAsync(User,item, SecAppUserOperations.Update)).Succeeded)
+            {
+                @*<a asp-action="Edit" asp-route-id="@item.SecAppUserId">Edit</a>*@ 
+            }|
+                <a asp-action="Details" asp-route-id="@item.SecAppUserId">Details</a> |
+            @if ((await AuthorizationService.AuthorizeAsync(User, item, SecAppUserOperations.Update)).Succeeded && item.Name!="admin")
+            {
+                <a asp-action="Delete" asp-route-id="@item.SecAppUserId">Delete</a>
+            }
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add new user</a>
+</p>
